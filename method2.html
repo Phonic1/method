@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title> M6 Order the Scientific Method - Drag and Drop</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --fg: #ffff00;
+      --accent: #00bfff;
+      --correct: #00ff88;
+      --incorrect: #ff5555;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Comic Sans MS", "Comic Sans", "Trebuchet MS", "Verdana", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .wrapper {
+      max-width: 960px;
+      width: 100%;
+      padding: 20px;
+    }
+
+    h1, h2, p {
+      margin: 0 0 0.6em;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+    }
+
+    p.intro {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+
+    .instructions {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+
+    .board {
+      margin-top: 16px;
+      border-radius: 16px;
+      border: 2px solid var(--fg);
+      padding: 16px;
+      background: #111111;
+    }
+
+    .board-inner {
+      display: grid;
+      grid-template-columns: 80px 1fr 220px;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .numbers-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: sticky;
+      top: 10px;
+      align-self: flex-start;
+    }
+
+    .number-slot {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: 2px solid var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: bold;
+      background: #000000;
+      flex-shrink: 0;
+    }
+
+    .drop-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drop-slot {
+      min-height: 56px;
+      border-radius: 12px;
+      border: 2px dashed #555555;
+      padding: 4px 8px;
+      display: flex;
+      align-items: stretch;
+      background: #000000;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+
+    .drop-slot.over {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.4);
+      background: #111122;
+    }
+
+    .drop-slot.correct {
+      border-style: solid;
+      border-color: var(--correct);
+      background: #002211;
+    }
+
+    .drop-slot.incorrect {
+      border-style: solid;
+      border-color: var(--incorrect);
+      background: #330000;
+    }
+
+    .placeholder-text {
+      font-size: 0.8rem;
+      color: #cccc66;
+      opacity: 0.7;
+      margin: auto 0;
+    }
+
+    .tiles-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tile {
+      border-radius: 12px;
+      border: 2px solid #444444;
+      background: #222222;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s, background 0.15s;
+    }
+
+    .tile-label {
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 2px solid var(--fg);
+      background: #000000;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .tile.dragging {
+      opacity: 0.7;
+      transform: scale(1.03);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.5);
+    }
+
+    .bank-title {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      color: #dddd88;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      border-radius: 999px;
+      border: 2px solid var(--fg);
+      background: #111111;
+      color: var(--fg);
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    }
+
+    button:hover {
+      background: #222222;
+      box-shadow: 0 0 0 2px rgba(255, 255, 0, 0.4);
+    }
+
+    button:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    button.primary {
+      border-color: var(--accent);
+    }
+
+    .feedback {
+      text-align: center;
+      min-height: 1.2em;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .feedback.correct {
+      color: var(--correct);
+    }
+
+    .feedback.incorrect {
+      color: var(--incorrect);
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #dddd88;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 800px) {
+      .board-inner {
+        grid-template-columns: 60px 1fr;
+        grid-template-rows: auto auto;
+      }
+      .tiles-column {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .tile {
+        max-width: 270px;
+      }
+    }
+
+    @media (max-width: 550px) {
+      h1 {
+        font-size: 1.6rem;
+      }
+      .board-inner {
+        grid-template-columns: 1fr;
+      }
+      .numbers-column {
+        flex-direction: row;
+        justify-content: space-between;
+        position: static;
+      }
+      .drop-column {
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>M6 Order the Scientific Method</h1>
+    <p class="intro">
+      Drag each yellow tile into the matching numbered slot to put the steps of the scientific method in order.
+    </p>
+    <p class="instructions">
+      1 is the first thing you do, 6 is the last. When you are ready, press “Check my order”.
+    </p>
+
+    <div class="board" aria-label="Drag and drop ordering game">
+      <div class="board-inner">
+        <!-- Fixed numbers -->
+        <div class="numbers-column" aria-hidden="true">
+          <div class="number-slot">1</div>
+          <div class="number-slot">2</div>
+          <div class="number-slot">3</div>
+          <div class="number-slot">4</div>
+          <div class="number-slot">5</div>
+          <div class="number-slot">6</div>
+        </div>
+
+        <!-- Drop targets -->
+        <div class="drop-column" id="dropColumn">
+          <div class="drop-slot" data-position="0">
+            <span class="placeholder-text">Drop the first step here</span>
+          </div>
+          <div class="drop-slot" data-position="1">
+            <span class="placeholder-text">Drop the second step here</span>
+          </div>
+          <div class="drop-slot" data-position="2">
+            <span class="placeholder-text">Drop the third step here</span>
+          </div>
+          <div class="drop-slot" data-position="3">
+            <span class="placeholder-text">Drop the fourth step here</span>
+          </div>
+          <div class="drop-slot" data-position="4">
+            <span class="placeholder-text">Drop the fifth step here</span>
+          </div>
+          <div class="drop-slot" data-position="5">
+            <span class="placeholder-text">Drop the last step here</span>
+          </div>
+        </div>
+
+        <!-- Tile bank -->
+        <div>
+          <div class="bank-title">Step tiles</div>
+          <div class="tiles-column" id="tileBank">
+            <!-- Tiles will be injected -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="primary" id="checkBtn">Check my order</button>
+      <button id="resetBtn">Reset tiles</button>
+      <button id="showBtn">Show correct order</button>
+    </div>
+
+    <div id="feedback" class="feedback" aria-live="polite"></div>
+    <div id="hint" class="hint"></div>
+  </div>
+
+  <script>
+    const correctOrder = [
+      "Question",
+      "Research (ask what do we already know)",
+      "Make a hypothesis (a guess)",
+      "Do an experiment",
+      "Look at the results",
+      "Conclusion (Share what you found)"
+    ];
+
+    const dropColumn = document.getElementById("dropColumn");
+    const tileBank = document.getElementById("tileBank");
+    const checkBtn = document.getElementById("checkBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const showBtn = document.getElementById("showBtn");
+    const feedback = document.getElementById("feedback");
+    const hint = document.getElementById("hint");
+
+    let draggedTile = null;
+
+    function createTile(text, index) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.draggable = true;
+      tile.dataset.stepIndex = index;
+
+      const label = document.createElement("span");
+      label.className = "tile-label";
+      label.textContent = "Step";
+
+      const body = document.createElement("span");
+      body.textContent = text;
+
+      tile.appendChild(label);
+      tile.appendChild(body);
+
+      tile.addEventListener("dragstart", e => {
+        draggedTile = tile;
+        tile.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      tile.addEventListener("dragend", () => {
+        if (draggedTile) {
+          draggedTile.classList.remove("dragging");
+        }
+        draggedTile = null;
+      });
+
+      return tile;
+    }
+
+    function clearSlotsStyles() {
+      document.querySelectorAll(".drop-slot").forEach(slot => {
+        slot.classList.remove("over", "correct", "incorrect");
+      });
+    }
+
+    function setupDropSlot(slot) {
+      slot.addEventListener("dragover", e => {
+        e.preventDefault();
+        if (!draggedTile) return;
+        slot.classList.add("over");
+        e.dataTransfer.dropEffect = "move";
+      });
+
+      slot.addEventListener("dragleave", () => {
+        slot.classList.remove("over");
+      });
+
+      slot.addEventListener("drop", () => {
+        if (!draggedTile) return;
+        slot.classList.remove("over");
+        const placeholder = slot.querySelector(".placeholder-text");
+        if (placeholder) {
+          placeholder.remove();
+        }
+        if (slot.firstElementChild && slot.firstElementChild !== draggedTile) {
+          tileBank.appendChild(slot.firstElementChild);
+        }
+        slot.appendChild(draggedTile);
+      });
+    }
+
+    function setupBankDrop() {
+      tileBank.addEventListener("dragover", e => {
+        e.preventDefault();
+        if (!draggedTile) return;
+        e.dataTransfer.dropEffect = "move";
+      });
+
+      tileBank.addEventListener("drop", () => {
+        if (!draggedTile) return;
+        tileBank.appendChild(draggedTile);
+      });
+    }
+
+    function resetTiles() {
+      tileBank.innerHTML = "";
+      document.querySelectorAll(".drop-slot").forEach(slot => {
+        slot.innerHTML = "";
+        const placeholder = document.createElement("span");
+        placeholder.className = "placeholder-text";
+        const pos = parseInt(slot.dataset.position, 10);
+        const labels = [
+          "Drop the first step here",
+          "Drop the second step here",
+          "Drop the third step here",
+          "Drop the fourth step here",
+          "Drop the fifth step here",
+          "Drop the last step here"
+        ];
+        placeholder.textContent = labels[pos];
+        slot.appendChild(placeholder);
+        slot.classList.remove("correct", "incorrect", "over");
+      });
+
+      const shuffled = correctOrder.slice().sort(() => Math.random() - 0.5);
+      shuffled.forEach(text => {
+        const index = correctOrder.indexOf(text);
+        tileBank.appendChild(createTile(text, index));
+      });
+
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      hint.textContent = "";
+    }
+
+    function checkOrder() {
+      clearSlotsStyles();
+      const slots = Array.from(document.querySelectorAll(".drop-slot"));
+      let allFilled = true;
+      let allCorrect = true;
+
+      slots.forEach((slot, i) => {
+        const tile = slot.querySelector(".tile");
+        if (!tile) {
+          allFilled = false;
+          allCorrect = false;
+          slot.classList.add("incorrect");
+          return;
+        }
+        const stepIndex = parseInt(tile.dataset.stepIndex, 10);
+        const text = correctOrder[stepIndex];
+        if (text === correctOrder[i]) {
+          slot.classList.add("correct");
+        } else {
+          slot.classList.add("incorrect");
+          allCorrect = false;
+        }
+      });
+
+      if (!allFilled) {
+        feedback.textContent = "You still have empty slots. Try to fill all 6 steps.";
+        feedback.className = "feedback incorrect";
+        hint.textContent = "Tip: Use the tiles on the right and drag one into each numbered space.";
+        return;
+      }
+
+      if (allCorrect) {
+        feedback.textContent = "Brilliant! You ordered all the steps correctly.";
+        feedback.className = "feedback correct";
+        hint.textContent = "";
+      } else {
+        feedback.textContent = "Close! Some tiles are in the wrong place.";
+        feedback.className = "feedback incorrect";
+        hint.textContent = "Hint: First you notice something, then ask a question, make a smart guess, test it, look at what happened, and share what you learned.";
+      }
+    }
+
+    function showCorrect() {
+      clearSlotsStyles();
+      const slots = Array.from(document.querySelectorAll(".drop-slot"));
+      slots.forEach((slot, i) => {
+        slot.innerHTML = "";
+        const tile = createTile(correctOrder[i], i);
+        tile.draggable = false;
+        tile.style.cursor = "default";
+        slot.appendChild(tile);
+        slot.classList.add("correct");
+      });
+      tileBank.innerHTML = "";
+      feedback.textContent = "This is the correct order of the scientific method.";
+      feedback.className = "feedback correct";
+      hint.textContent = "(Press Reset tiles to try again.)";
+    }
+
+    document.querySelectorAll(".drop-slot").forEach(setupDropSlot);
+    setupBankDrop();
+    resetTiles();
+
+    checkBtn.addEventListener("click", checkOrder);
+    resetBtn.addEventListener("click", resetTiles);
+    showBtn.addEventListener("click", showCorrect);
+  </script>
+</body>
+</html>
